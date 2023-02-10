@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://unpkg.com/konva@8.4.2/konva.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Konva Line Polygon Demo</title>
+    <style>
+      body {
+        margin: 100;
+        padding: 100;
+        overflow: hidden;
+        background-color: #f0f0f0;
+        overflow-y: scroll;
+      }
+
+      .inputButton {
+        background-color:white;
+        color: black;
+        border: 2px solid;
+        border-radius: 5pt;
+        margin: 1px;
+        padding: 5px;
+        border-color:darkolivegreen;
+        opacity: 70%;
+      }
+
+      .inputButton:hover {
+        opacity: 100%;
+      }
+
+      .inlineForm {
+        display: inline;
+        z-index: 3;
+        
+        flex-grow: 1;
+        margin: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      
+      <form id="myForm" class="inlineForm">
+        <input type="button" id="realCsvButton" class='inputButton' value="1) Choose a *.csv file" onclick="document.getElementById('csvFile').click();" />
+        <input type="file" style='display: none;' id="csvFile" accept=".csv" />
+        <input type="submit" class="inputButton" id="readFile" value="2) Read file contents" />
+        <button class='inputButton' onclick="iDoMoreta()">3) Display curves</button>
+        <button class="inputButton" onclick="getPoly()">4) Save to *csv file</button>
+      </form>
+   
+      <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+      
+      <div id="tableDiv"></div>
+    </div>
+    <div id="container" class="container"></div>
+    <script>
+      const myForm = document.getElementById("myForm");
+      const csvFile = document.getElementById("csvFile");
+
+      const pointArray = [];
+      const pointArrayForExport = [];
+
+      var verticalRange = 0;
+      var horizontalRange = 0;
+      var verticalMin = 500;
+
+      var width = window.innerWidth;
+      var height = window.innerHeight;
+
+      let hScalingMax = 0;
+      let vScalingMax = 0;
+
+      let vScalingMin = 0;
+
+      let fileName = ""
+
+      myForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        fileName = csvFile.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          const text = e.target.result;
+          const data = d3.csvParse(text);
+          for (let field = 0; field < data.length; field++) {
+
+            Object.entries(data[field]).forEach(([k, v], index) => {
+              if (index === 0) return;
+              if (k && v > 0) {
+                if (parseInt(k) > horizontalRange) {
+                  horizontalRange = k;
+                }
+                if (parseInt(v * 100) > verticalRange) {
+                  verticalRange = parseInt(v * 100);
+                }
+                
+                if (parseInt(v * 100) < verticalMin) {
+                    verticalMin = parseInt(v * 100)
+                }
+
+              }
+            });
+          }
+
+          console.log(
+            `hor. range is ${horizontalRange} and window is ${width}`
+          );
+          console.log(
+            `vert. range is ${verticalRange} and window is ${height}`
+          );
+          console.log(
+            `vert. min is ${verticalMin}`
+          );
+
+          hScalingMax = parseInt(width/horizontalRange)
+          vScalingMax = parseInt(height/verticalRange)
+
+          console.log(vScalingMax)
+          console.log(hScalingMax)
+          console.log(verticalMin)
+
+          for (let field = 0; field < data.length; field++) {
+            let points_group = [];
+            let points_group_for_export = [];
+
+            Object.entries(data[field]).forEach(([k, v], index) => {
+              if (index === 0) {
+                points_group_for_export.push(v);
+                return;
+              }
+              if (k && v > 0) {
+                points_group.push(parseInt(k * hScalingMax));
+
+                // unflipped
+                let uf = parseInt(v * 100) * vScalingMax
+                // flipped
+                let f = ((verticalRange - verticalMin)) - uf
+                points_group.push(f+height);
+
+                points_group_for_export.push(parseFloat(v));
+              }
+            });
+
+            pointArray.push(points_group);
+            pointArrayForExport.push(points_group_for_export);
+          }
+        };
+        reader.readAsText(fileName);
+      });
+
+      var stage = new Konva.Stage({
+        container: "container",
+        width: width * .95,
+        height: height,
+      });
+
+      stage.getContainer().style.backgroundColor = "#DDDDDD";
+      stage.getContainer().style.border = '3px solid black';
+      stage.getContainer().style.borderRadius = '30px';
+      stage.getContainer().style.margin = '30px';
+      stage.getContainer().style.width = '95%';
+      stage.getContainer().style.height = '95%';
+      
+
+      const polyObjects = [];
+      const colors = [
+        "maroon",
+        "red",
+        "orange",
+        "olive",
+        "green",
+        "purple",
+        "fuschia",
+        "blue",
+        "navy",
+        "black",
+        "teal",
+        "aqua",
+        "yellow",
+        "gray",
+        "silver",
+        "lime",
+      ];
+
+      function iDoMoreta() {
+        var layer = new Konva.Layer();
+
+        // points are [x1, y1, x2, y2, x3, y3 etc]
+
+        for (let a = 0; a < pointArray.length; a++) {
+          let poly = new Konva.Line({
+            points: pointArray[a],
+            fill: "#00D2FF",
+            stroke: colors[a],
+            strokeWidth: 7,
+            closed: false,
+            draggable: true,
+            dragBoundFunc: function (pos) {
+              return {
+                x: pos.x,
+                y: this.absolutePosition().y,
+              };
+            },
+          });
+          
+          polyObjects.push(poly);
+
+          // add the shape to the layer
+          layer.add(poly);
+          // add the layer to the stage
+          stage.add(layer);
+        }
+      }
+
+      function getPoly() {
+        for (let p = 0; p < polyObjects.length; p++) {
+          console.log(polyObjects[p].attrs.x);
+          let adjustment = parseInt((polyObjects[p].attrs.x) / hScalingMax);
+
+          if (adjustment > 0) {
+            pointArrayForExport[p].splice(
+              1, 0, ...new Array(adjustment).fill(pointArrayForExport[p][1])
+            );
+          } else if (adjustment < 0) {
+            pointArrayForExport[p].splice(
+              1, Math.abs(adjustment)
+            );
+          }
+        }
+        console.log(pointArrayForExport);
+        createTable(pointArrayForExport);
+      }
+
+      function createTable(tableData) {
+        var table = document.createElement("table");
+        var tableBody = document.createElement("tbody");
+
+        tableData.forEach(function (rowData) {
+          if (rowData.length == 1) return
+          var row = document.createElement("tr");
+
+          rowData.forEach(function (cellData) {
+            var cell = document.createElement("td");
+            cell.appendChild(document.createTextNode(cellData));
+            row.appendChild(cell);
+          });
+
+          tableBody.appendChild(row);
+        });
+
+        table.appendChild(tableBody);
+        var tableDiv = document.getElementById("tableDiv");
+        tableDiv.appendChild(table);
+
+        let csvContent = "data:text/csv;charset=utf-8," 
+        + pointArrayForExport.map(e => e.join(",")).join("\n");
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${fileName.name.replace(".csv", "")}_shuffled.csv`);
+        document.body.appendChild(link); // Required for FF
+
+        link.click();
+      }
+    </script>
+  </body>
+</html>
