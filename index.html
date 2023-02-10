@@ -3,7 +3,7 @@
   <head>
     <script src="https://unpkg.com/konva@8.4.2/konva.min.js"></script>
     <meta charset="utf-8" />
-    <title>Konva Line Polygon Demo</title>
+    <title>Curve Inspector</title>
     <style>
       body {
         margin: 100;
@@ -41,12 +41,14 @@
     <div>
       
       <form id="myForm" class="inlineForm">
-        <input type="button" id="realCsvButton" class='inputButton' value="1) Choose a *.csv file" onclick="document.getElementById('csvFile').click();" />
+        <input type="button" id="realCsvButton" class='inputButton' value="1) Choose a *.csv file" onclick=clickNHide() />
         <input type="file" style='display: none;' id="csvFile" accept=".csv" />
-        <input type="submit" class="inputButton" id="readFile" value="2) Read file contents" />
-        <button class='inputButton' onclick="iDoMoreta()">3) Display curves</button>
-        <button class="inputButton" onclick="getPoly()">4) Save to *csv file</button>
+        <input type="submit" class="inputButton" id="readFile" value="2) Read file contents" onclick='hide("readFile")' />
       </form>
+        <button class='inputButton' id='displayCurves' onclick="iDoMoreta()">3) Display curves</button>
+        <button class="inputButton" id='save' onclick="getPoly()">4) Save to *csv file</button>
+        <button class="inputButton" id='restart' onclick="init()">5) Start again</button>
+      
    
       <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -58,8 +60,8 @@
       const myForm = document.getElementById("myForm");
       const csvFile = document.getElementById("csvFile");
 
-      const pointArray = [];
-      const pointArrayForExport = [];
+      var pointArray = [];
+      var pointArrayForExport = [];
 
       var verticalRange = 0;
       var horizontalRange = 0;
@@ -74,6 +76,62 @@
       let vScalingMin = 0;
 
       let fileName = ""
+
+      var stage = new Konva.Stage({
+        container: "container",
+        width: width * .95,
+        height: height,
+      });
+
+      stage.getContainer().style.backgroundColor = "#DDDDDD";
+      stage.getContainer().style.border = '3px solid black';
+      stage.getContainer().style.borderRadius = '30px';
+      stage.getContainer().style.margin = '30px';
+      stage.getContainer().style.width = '95%';
+      stage.getContainer().style.height = '95%';
+      
+
+      var polyObjects = [];
+
+      init()
+      console.log(pointArray)
+
+      function init() {
+
+        pointArray.clear;
+        pointArrayForExport.clear;
+
+        verticalRange = 0;
+        horizontalRange = 0;
+        verticalMin = 500;
+
+        width = window.innerWidth;
+        height = window.innerHeight;
+
+        hScalingMax = 0;
+        vScalingMax = 0;
+
+        vScalingMin = 0;
+
+        fileName = ""       
+
+        polyObjects.clear;
+
+        stage.clear()
+        document.getElementById('realCsvButton').style.display = 'inline';
+        document.getElementById('readFile').style.display = 'inline';
+        document.getElementById('displayCurves').style.display = 'inline';
+        document.getElementById('save').style.display = 'inline';
+      }
+
+      function clickNHide() {
+        document.getElementById('csvFile').click();
+        document.getElementById('realCsvButton').style.display = 'none';
+      }
+
+      function hide(which) {
+        document.getElementById(which).style.display = 'none';
+      }
 
       myForm.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -103,22 +161,22 @@
             });
           }
 
-          console.log(
-            `hor. range is ${horizontalRange} and window is ${width}`
-          );
-          console.log(
-            `vert. range is ${verticalRange} and window is ${height}`
-          );
-          console.log(
-            `vert. min is ${verticalMin}`
-          );
+          // console.log(
+          //   `hor. range is ${horizontalRange} and window is ${width}`
+          // );
+          // console.log(
+          //   `vert. range is ${verticalRange} and window is ${height}`
+          // );
+          // console.log(
+          //   `vert. min is ${verticalMin}`
+          // );
 
           hScalingMax = parseInt(width/horizontalRange)
           vScalingMax = parseInt(height/verticalRange)
 
-          console.log(vScalingMax)
-          console.log(hScalingMax)
-          console.log(verticalMin)
+          // console.log(vScalingMax)
+          // console.log(hScalingMax)
+          // console.log(verticalMin)
 
           for (let field = 0; field < data.length; field++) {
             let points_group = [];
@@ -149,21 +207,7 @@
         reader.readAsText(fileName);
       });
 
-      var stage = new Konva.Stage({
-        container: "container",
-        width: width * .95,
-        height: height,
-      });
 
-      stage.getContainer().style.backgroundColor = "#DDDDDD";
-      stage.getContainer().style.border = '3px solid black';
-      stage.getContainer().style.borderRadius = '30px';
-      stage.getContainer().style.margin = '30px';
-      stage.getContainer().style.width = '95%';
-      stage.getContainer().style.height = '95%';
-      
-
-      const polyObjects = [];
       const colors = [
         "maroon",
         "red",
@@ -184,6 +228,9 @@
       ];
 
       function iDoMoreta() {
+
+        hide('displayCurves')
+
         var layer = new Konva.Layer();
 
         // points are [x1, y1, x2, y2, x3, y3 etc]
@@ -230,28 +277,29 @@
         }
         console.log(pointArrayForExport);
         createTable(pointArrayForExport);
+        hide('save')
       }
 
       function createTable(tableData) {
-        var table = document.createElement("table");
-        var tableBody = document.createElement("tbody");
+        // var table = document.createElement("table");
+        // var tableBody = document.createElement("tbody");
 
-        tableData.forEach(function (rowData) {
-          if (rowData.length == 1) return
-          var row = document.createElement("tr");
+        // tableData.forEach(function (rowData) {
+        //   if (rowData.length == 1) return
+        //   var row = document.createElement("tr");
 
-          rowData.forEach(function (cellData) {
-            var cell = document.createElement("td");
-            cell.appendChild(document.createTextNode(cellData));
-            row.appendChild(cell);
-          });
+        //   rowData.forEach(function (cellData) {
+        //     var cell = document.createElement("td");
+        //     cell.appendChild(document.createTextNode(cellData));
+        //     row.appendChild(cell);
+        //   });
 
-          tableBody.appendChild(row);
-        });
+        //   tableBody.appendChild(row);
+        // });
 
-        table.appendChild(tableBody);
-        var tableDiv = document.getElementById("tableDiv");
-        tableDiv.appendChild(table);
+        // table.appendChild(tableBody);
+        // var tableDiv = document.getElementById("tableDiv");
+        // tableDiv.appendChild(table);
 
         let csvContent = "data:text/csv;charset=utf-8," 
         + pointArrayForExport.map(e => e.join(",")).join("\n");
