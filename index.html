@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/konva@8.4.2/konva.min.js"></script>
     <meta charset="utf-8" />
     <title>Curve Inspector</title>
@@ -29,9 +33,13 @@
       }
 
       .inlineForm {
-        display: inline;
-        z-index: 3;
-        
+        display: inline;        
+        flex-grow: 1;
+        margin: 30px;
+      }
+
+      .inlineButtons {
+        display: inline;        
         flex-grow: 1;
         margin: 30px;
       }
@@ -39,23 +47,27 @@
   </head>
   <body>
     <div>
-      
-      <form id="myForm" class="inlineForm">
-        <input type="button" id="realCsvButton" class='inputButton' value="1) Choose a *.csv file" onclick=clickNHide() />
-        <input type="file" style='display: none;' id="csvFile" accept=".csv" />
-        <input type="submit" class="inputButton" id="readFile" value="2) Read file contents" onclick='hide("readFile")' />
-      </form>
-        <button class='inputButton' id='displayCurves' onclick="iDoMoreta()">3) Display curves</button>
-        <button class="inputButton" id='save' onclick="getPoly()">4) Save to *csv file</button>
-        <button class="inputButton" id='restart' onclick="init()">5) Start again</button>
-      
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <form id="myForm" class="inlineForm">
+          <button type="button" id="realCsvButton" class="btn btn-secondary" onclick=clickNHide()>1) Choose a *.csv file</button>
+          <input type="file" style='display: none;' id="csvFile" accept=".csv" />
+          <button type="submit" class="btn btn-secondary" id="readFile" onclick='hide("readFile")'>2) Read file contents</button>
+        </form>
+        <div class="inlineButtons">
+          <button type="button" class="btn btn-secondary" id="displayCurves" onclick="displayCurves()">3) Display curves</button>   
+          <button type="button" class="btn btn-secondary" id='save' onclick="getPoly()">4) Save to *csv file</button>
+          <button type="button" class="btn btn-secondary"  id='restart' onclick="init()">5) Start again</button>
+          <a href="/what_for.html" class="btn btn-info" role="button">How should I use this mysterious site?</a>
+        </div>
+        
+      </div>
    
       <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
       
       <div id="tableDiv"></div>
     </div>
-    <div id="container" class="container"></div>
+    <div id="container" class="container_"></div>
     <script>
       const myForm = document.getElementById("myForm");
       const csvFile = document.getElementById("csvFile");
@@ -90,16 +102,17 @@
       stage.getContainer().style.width = '95%';
       stage.getContainer().style.height = '95%';
       
+      layer = new Konva.Layer();
 
       var polyObjects = [];
 
       init()
-      console.log(pointArray)
+      
 
       function init() {
 
-        pointArray.clear;
-        pointArrayForExport.clear;
+        pointArray.length = 0;
+        pointArrayForExport.length = 0;
 
         verticalRange = 0;
         horizontalRange = 0;
@@ -115,22 +128,25 @@
 
         fileName = ""       
 
-        polyObjects.clear;
+        polyObjects.length = 0;
 
         stage.clear()
-        document.getElementById('realCsvButton').style.display = 'inline';
-        document.getElementById('readFile').style.display = 'inline';
-        document.getElementById('displayCurves').style.display = 'inline';
-        document.getElementById('save').style.display = 'inline';
+        layer.clear()
+        $('#realCsvButton').removeClass("disabled");
+        $('#readFile').removeClass("disabled");
+        $('#displayCurves').removeClass("disabled");
+        $('#save').removeClass("disabled");
+
+        console.log(polyObjects)
       }
 
       function clickNHide() {
         document.getElementById('csvFile').click();
-        document.getElementById('realCsvButton').style.display = 'none';
+        $('#realCsvButton').addClass("disabled");
       }
 
       function hide(which) {
-        document.getElementById(which).style.display = 'none';
+        $(`#${which}`).addClass("disabled");
       }
 
       myForm.addEventListener("submit", function (e) {
@@ -141,6 +157,7 @@
         reader.onload = function (e) {
           const text = e.target.result;
           const data = d3.csvParse(text);
+          console.log(data)
           for (let field = 0; field < data.length; field++) {
 
             Object.entries(data[field]).forEach(([k, v], index) => {
@@ -227,11 +244,9 @@
         "lime",
       ];
 
-      function iDoMoreta() {
+      function displayCurves() {
 
         hide('displayCurves')
-
-        var layer = new Konva.Layer();
 
         // points are [x1, y1, x2, y2, x3, y3 etc]
 
@@ -252,12 +267,14 @@
           });
           
           polyObjects.push(poly);
+          
 
           // add the shape to the layer
           layer.add(poly);
-          // add the layer to the stage
-          stage.add(layer);
+          
         }
+        // add the layer to the stage
+        stage.add(layer);
       }
 
       function getPoly() {
@@ -277,6 +294,9 @@
         }
         console.log(pointArrayForExport);
         createTable(pointArrayForExport);
+        for (let a = 0; a < polyObjects.length; a++) {
+          polyObjects[a].destroy()
+        }
         hide('save')
       }
 

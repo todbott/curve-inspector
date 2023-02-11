@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/konva@8.4.2/konva.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Curve Inspector</title>
+    <style>
+      body {
+        margin: 100;
+        padding: 100;
+        overflow: hidden;
+        background-color: #f0f0f0;
+        overflow-y: scroll;
+      }
+
+      .inlineForm {
+        display: inline;        
+        flex-grow: 1;
+        margin: 30px;
+      }
+
+      .inlineButtons {
+        display: inline;        
+        flex-grow: 1;
+        margin: 30px;
+      }
+
+      h2 {
+        margin-top: 30px;
+      }
+
+      .card-body {
+        font-size: larger;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+        <div class="container">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <div class="inlineButtons">
+            <a href="/index.html" class="btn btn-info" role="button">Back</a>
+        </div>
+        
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+            <p>Hello, I'm <a href='https://www.linkedin.com/in/todd-gillies-0ab0a8105/'>Todd Gillies</a>, a data scientist and predictive model builder in the agtech sector.  I often work with NDMI, NDVI, EVI (all Sentinel-2), and VV, VH, and RVI (all Sentinel-1) data when trying to build models, such as a model that would find the correlation between NDMI during a crop cycle and eventual yield.</p>
+
+            <p>The problem I have run into over and over again is this: <em>Farmers very frequently mis-report the planting date of their field.</em> Here is a perfect example--the RVI curves of 10 fields, from planting onward.  RVI should increase as vegetation increases, as it is a type of measure of backscatter caused by radio waves hitting vegetation.  However, about half of the fields in the screenshot below have a <em>decreasing RVI value in the first few weeks after 'planting',</em> meaning that the reported 'planting date' for about half of these fields seems wrong:</p>
+
+            
+            <img class="card-img mx-auto" src="/rvi_unadjusted.png">
+            <p>This kind of data error makes crop modeling very difficult, as an accurate planting date is the first step in training an accurate model. Say, for example, there turned out to be a correlation between RVI at 30-60 DAP (days after planting) and yield.  With a noisy dataset like the one above, we would be unable to discover that correlation, as half of our model training examples clearly have incorrect planting dates.</p>
+            
+            <p>Opening the data as a *.csv file in Excel, then manually shuffling the curves backward and forward in time is very tiring, and unsuitable for large datasets.  That's the reason I developed this site.</p>
+
+            <h2>Step 1: Load a CSV file</h2>
+            <p>The *.csv file containing the curves you want to adjust should be as shown in the screenshot below. The first row (a header) can have any content, but here we can see mine has column headings, then 1, 2, 3, 4, etc (vegetation index values at each day after planting).  Columns A and B can be blank, or can contain whatever information you'd like.  <em>Column B, along with the shuffled curves, will be returned in the end, in the form of a downloaded *.csv file.</em></p>
+            <img class="card-img-top smallimg mx-auto"src="/csv_example.png">
+
+            <h2>Step 2: Shuffle those curves!</h2>
+            <p>Using the interface on the main page, the curves can be clicked-and-dragged, so that you may shuffle them forward or backward in time.  Any curves that are too crazy (outliers), can simply be dragged all the way to the left, until they disappear.  These curves will be discarded.</p>
+            <img class="card-img mx-small"src="/vokoscreen-2023-02-11_16-20-17.gif">
+
+            <h2>Step 3: Download the adjusted curves as a *.csv file</h2>
+            <p>Once you're happy with the curve positions, and feel like all the planting dates have been lined up, click on the button to download the data as a *.csv file.  The adjusted curves (along with the information in column B of the original *.csv file) will be downloaded to your computer. Opening the adjusted file and checking the curves, we can see they're pretty lined up now!</p>
+            <img class="card-img mx-auto" src="/rvi_adjusted.png">
+
+            </div>
+        </div>
+        </div>
+      </div>
+        </div>
+    </div>
+</body>
+</html>
