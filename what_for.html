@@ -51,13 +51,13 @@
         <div class="col-sm-12">
         <div class="card">
             <div class="card-body">
-            <p>Hello, I'm <a href='https://www.linkedin.com/in/todd-gillies-0ab0a8105/'>Todd Gillies</a>, a data scientist and predictive model builder in the agtech sector.  I often work with NDMI, NDVI, EVI (all Sentinel-2), and VV, VH, and RVI (all Sentinel-1) data when trying to build models, such as a model that would find the correlation between NDMI during a crop cycle and eventual yield.</p>
+            <p>Hello, I'm <a href='https://www.linkedin.com/in/todd-gillies-0ab0a8105/'>Todd Gillies</a>, a data scientist and predictive model builder in the agtech sector.  I often work with various crop growth curves when trying to build models, such as a model that would find the correlation between GNDVI during a crop cycle and crop health at the end of that cycle.</p>
 
-            <p>The problem I have run into over and over again is this: <em>Farmers very frequently mis-report the planting date of their field.</em> Here is a perfect example--the RVI curves of 10 fields, from planting onward.  RVI should increase as vegetation increases, as it is a type of measure of backscatter caused by radio waves hitting vegetation.  However, about half of the fields in the screenshot below have a <em>decreasing RVI value in the first few weeks after 'planting',</em> meaning that the reported 'planting date' for about half of these fields seems wrong:</p>
+            <p>The problem I have run into over and over again is this: <em>Farmers very frequently mis-report the planting date of their field.</em> Here is a perfect example--the growth curves of 10 fields, from planting onward.  The curve should increase as vegetation increases, as this curve is a type of measure of backscatter caused by radio waves hitting vegetation.  However, about half of the fields in the screenshot below have a <em>decreasing value in the first few weeks after 'planting',</em> meaning that the reported 'planting date' for about half of these fields seems wrong:</p>
 
             
             <img class="card-img mx-auto" src="./rvi_unadjusted.png">
-            <p>This kind of data error makes crop modeling very difficult, as an accurate planting date is the first step in training an accurate model. Say, for example, there turned out to be a correlation between RVI at 30-60 DAP (days after planting) and yield.  With a noisy dataset like the one above, we would be unable to discover that correlation, as half of our model training examples clearly have incorrect planting dates.</p>
+            <p>This kind of data error makes crop modeling very difficult, as an accurate planting date is the first step in training an accurate model. Say, for example, there turned out to be a correlation between this curve at 30-60 DAP (days after planting) and crop health.  With a noisy dataset like the one above, we would be unable to discover that correlation, as half of our model training examples clearly have incorrect planting dates.</p>
             
             <p>Opening the data as a *.csv file in Excel, then manually shuffling the curves backward and forward in time is very tiring, and unsuitable for large datasets.  That's the reason I developed this site.</p>
 
